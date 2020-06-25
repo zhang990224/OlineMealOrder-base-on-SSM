@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="SSM_OnlineMealOrder:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/SSM_OnlineMealOrder_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="SSM_OnlineMealOrder/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="SSM_OnlineMealOrder" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Spring-5.2.3.RELEASE" />
+          <element id="library" level="project" name="asm-7.1" />
+          <element id="library" level="project" name="standard-1.1.2" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

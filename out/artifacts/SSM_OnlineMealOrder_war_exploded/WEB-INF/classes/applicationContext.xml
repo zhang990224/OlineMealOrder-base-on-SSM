@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	                       http://www.springframework.org/schema/mvc
+	                       http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+    <context:component-scan base-package="com.ordering"/>
+
+    <!--加载java的配置文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!--第一步：配置数据源-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+    <!--第二步：创建sqlSessionFactory，生产sqlSession-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:sqlMapConfig.xml"/>
+    </bean>
+    <!--配置mybatis接口代理开发
+        * 接口类和映射文件必须同名
+        * 接口类与映射文件必须在同一目录下
+        * 映射文件namespace名字必须是借口的全类路径
+        * 接口的方法名必须和映射Statement的id一致-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.ordering.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!--第三步：事务-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--配置通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="save" propagation="REQUIRED"/>
+            <tx:method name="update" propagation="REQUIRED"/>
+            <tx:method name="delete" propagation="REQUIRED"/>
+            <tx:method name="insert" propagation="REQUIRED"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--配置拦截service-->
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.ordering.service.*.*(..))"/>
+    </aop:config>
+
+    <!--配置路径-->
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+    <mvc:resources mapping="/style/**" location="/style/"/>
+    <mvc:resources mapping="/images/**" location="/images/"/>
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/upload/**" location="/upload/"/>
+</beans>

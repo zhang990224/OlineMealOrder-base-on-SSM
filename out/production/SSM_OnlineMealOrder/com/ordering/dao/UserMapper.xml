@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--注意：在mapper代理时，它具有特殊及重要的作用-->
+<!-- namespace：命名空间，用于隔离sql -->
+<!-- 还有一个很重要的作用，使用动态代理开发DAO，1. namespace必须和Mapper接口类路径一致 -->
+<mapper namespace="com.ordering.dao.UserMapper">
+    <resultMap id="CollectShop" type="com.ordering.po.Collect">
+        <id column="id" property="id"/>
+        <result column="shop_id" property="shop_id"/>
+        <result column="user_id" property="user_id"/>
+        <association property="shop" javaType="com.ordering.po.Shop">
+            <id column="id" property="id"/>
+            <result column="shop_name" property="shop_name"/>
+            <result column="shop_img" property="shop_img"/>
+        </association>
+    </resultMap>
+
+    <select id="findUserName" parameterType="String" resultType="int">
+        SELECT count(*) FROM `user` WHERE username = #{username}
+    </select>
+    <select id="findEmail" parameterType="String" resultType="int">
+        SELECT count(*) FROM `user` WHERE email = #{email}
+    </select>
+    <select id="findPhone" parameterType="String" resultType="int">
+        SELECT count(*) FROM `user` WHERE phone = #{phone}
+    </select>
+    <select id="DisAllUser" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.User">
+        SELECT * FROM `user` limit #{start},#{pageCount};
+    </select>
+    <select id="DisSearchUser" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.User">
+        SELECT * FROM `user` where username like concat('%',#{username},'%') limit #{start},#{pageCount};
+    </select>
+    <select id="CountSearchUser" parameterType="String" resultType="int">
+        SELECT count(*) FROM `user` where username like concat('%',#{username},'%');
+    </select>
+    <select id="CountAllUser" resultType="int">
+        SELECT count(*) FROM `user`;
+    </select>
+    <update id="updateUserSateById" parameterType="com.ordering.po.User">
+	    UPDATE `user` SET isused = #{isused} WHERE id = #{id}
+    </update>
+    <insert id="insertUser" parameterType="com.ordering.po.User">
+        <selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert INTO `user`
+        (username,password,email,phone,img,isused) values (#{username},#{password},#{email},#{phone},#{img},#{isused})
+    </insert>
+    <select id="findUserNameUser" parameterType="com.ordering.po.User" resultType="int">
+        SELECT count(*) FROM `user` WHERE username = #{username} and password = #{password} and isused = 1;
+    </select>
+    <select id="findEmailUser" parameterType="com.ordering.po.User" resultType="int">
+        SELECT count(*) FROM `user` WHERE email = #{email} and password = #{password} and isused = 1;
+    </select>
+    <select id="findPhoneUser" parameterType="com.ordering.po.User" resultType="int">
+        SELECT count(*) FROM `user` WHERE phone = #{phone} and password = #{password} and isused = 1;
+    </select>
+    <select id="findUserByName" parameterType="String" resultType="com.ordering.po.User">
+        SELECT * FROM `user` WHERE username = #{username}
+    </select>
+    <select id="findUserByEmail" parameterType="String" resultType="com.ordering.po.User">
+        SELECT * FROM `user` WHERE email = #{email}
+    </select>
+    <select id="findUserByPhone" parameterType="String" resultType="com.ordering.po.User">
+        SELECT * FROM `user` WHERE phone = #{phone}
+    </select>
+    <!-- 更新头像 -->
+    <update id="updateHeadById" parameterType="com.ordering.po.User">
+	    UPDATE `user` SET img = #{img} WHERE id = #{id}
+    </update>
+    <!-- 更新用户密码 -->
+    <update id="updatePswById" parameterType="com.ordering.po.User">
+	UPDATE `user` SET
+	password = #{password} WHERE id = #{id}
+    </update>
+    <select id="CountShopCollectedById" parameterType="int" resultType="int">
+        select count(*) from collect where shop_id = #{shop_id};
+    </select>
+    <select id="CountUserCollectById" parameterType="com.ordering.po.Collect" resultType="int">
+        select count(*) from collect where shop_id = #{shop_id} and user_id = #{user_id};
+    </select>
+    <!-- 收藏 -->
+    <insert id="CollectShop" parameterType="com.ordering.po.Collect">
+        <selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO `collect`
+        (user_id,shop_id) VALUES (#{user_id},#{shop_id})
+    </insert>
+    <!-- 取消收藏 -->
+    <delete id="CanelCollectShop" parameterType="com.ordering.po.Collect">
+		delete from collect where shop_id = #{shop_id} and user_id = #{user_id};
+	</delete>
+    <select id="DisCollectShopByUserId" parameterType="com.ordering.po.Pageresult" resultMap="CollectShop">
+        select * from collect c left join shop s on c.shop_id = s.id where c.user_id = #{user_id} limit #{start},#{pageCount};
+    </select>
+    <select id="CountCollectShopByUserId" parameterType="int" resultType="int">
+        select count(*) from collect where user_id = #{user_id};
+    </select>
+
+    <!--管理端-->
+    <!--登陆-->
+    <select id="FindAdmin" parameterType="com.ordering.po.Admin" resultType="int">
+        SELECT count(*) FROM admin where username = #{username} and password = #{password}
+    </select>
+</mapper>

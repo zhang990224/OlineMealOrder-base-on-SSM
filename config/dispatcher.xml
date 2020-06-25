@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 将controller交给spring管理 -->
+    <context:component-scan base-package="com.ordering"></context:component-scan>
+
+    <!--
+        <mvc:annotation-driven/>默认创建RequestMappingHandlerMapping，RequestMappingHandlerAdapter
+        提供对json数据格式支持
+    -->
+    <mvc:annotation-driven/>
+    <!--放行静态资源-->
+    <mvc:default-servlet-handler/>
+
+    <!-- 配置视图解析器：解析出真正的物理视图
+        后台返回逻辑视图：index
+        解析出真正的物理视图，前端+逻辑视图+后缀==/WEB-INF/index.jsp(/index.jsp)
+    -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+    <!--&lt;!&ndash;改变默认启动网页&ndash;&gt;-->
+    <!--<mvc:view-controller path="/" view-name="redirect:index" />-->
+
+    <!--文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="10240000"></property>
+    </bean>
+</beans>

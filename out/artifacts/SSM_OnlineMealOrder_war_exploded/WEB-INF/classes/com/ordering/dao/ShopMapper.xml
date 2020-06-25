@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--注意：在mapper代理时，它具有特殊及重要的作用-->
+<!-- namespace：命名空间，用于隔离sql -->
+<!-- 还有一个很重要的作用，使用动态代理开发DAO，1. namespace必须和Mapper接口类路径一致 -->
+<mapper namespace="com.ordering.dao.ShopMapper">
+    <resultMap type="com.ordering.po.Menu" id="MenuShop">
+        <id property="menu_id" column="menu_id" />
+        <result property="shop_id" column="shop_id" />
+        <result property="menu_name" column="menu_name" />
+        <result property="menu_img" column="menu_img" />
+        <result property="menu_price" column="menu_price" />
+        <result property="menu_sell" column="menu_sell" />
+        <result property="menu_count" column="menu_count" />
+        <association property="shop" javaType="com.ordering.po.Shop">
+            <id column="id" property="id"/>
+            <result column="shop_name" property="shop_name"/>
+            <result column="shop_address" property="shop_address"/>
+            <result column="shop_state" property="shop_state"/>
+        </association>
+    </resultMap>
+    <resultMap type="com.ordering.po.Comment" id="CommentMenuShop">
+        <id property="id" column="id" />
+        <result property="user_id" column="user_id" />
+        <result property="shop_id" column="shop_id" />
+        <result property="menu_id" column="menu_id" />
+        <result property="content" column="content" />
+        <result property="createtime" column="createtime" />
+        <association property="menu" javaType="com.ordering.po.Menu">
+            <id property="menu_id" column="menu_id" />
+            <result property="shop_id" column="shop_id" />
+            <result property="menu_name" column="menu_name" />
+            <result property="menu_img" column="menu_img" />
+            <result property="menu_price" column="menu_price" />
+            <result property="menu_count" column="menu_count" />
+            <result property="menu_comment" column="menu_comment" />
+            <result property="menu_sell" column="menu_sell" />
+            <association property="shop" javaType="com.ordering.po.Shop">
+                <id column="id" property="id"/>
+                <result column="shop_name" property="shop_name"/>
+                <result column="shop_state" property="shop_state"/>
+            </association>
+        </association>
+    </resultMap>
+    <resultMap type="com.ordering.po.Cart" id="CartMenuShop">
+        <id property="cart_id" column="cart_id" />
+        <result property="user_id" column="user_id" />
+        <result property="menu_id" column="menu_id" />
+        <result property="menu_num" column="menu_num" />
+        <association property="menu" javaType="com.ordering.po.Menu">
+            <id property="menu_id" column="menu_id" />
+            <result property="shop_id" column="shop_id" />
+            <result property="menu_name" column="menu_name" />
+            <result property="menu_img" column="menu_img" />
+            <result property="menu_price" column="menu_price" />
+            <result property="menu_count" column="menu_count" />
+            <result property="menu_sell" column="menu_sell" />
+            <association property="shop" javaType="com.ordering.po.Shop">
+                <id column="id" property="id"/>
+                <result column="shop_name" property="shop_name"/>
+                <result column="shop_address" property="shop_address"/>
+                <result column="shop_income" property="shop_income"/>
+            </association>
+        </association>
+    </resultMap>
+    <insert id="AddShop" parameterType="com.ordering.po.Shop">
+        <selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert INTO `shop`
+        (shop_name,shop_type,shop_special,shop_price,shop_phone,shop_address,shop_discount,opentime,shop_img,shop_income,shop_state) values (#{shop_name},#{shop_type},#{shop_special},#{shop_price},#{shop_phone},#{shop_address},#{shop_discount},#{opentime},#{shop_img},#{shop_income},#{shop_state});
+    </insert>
+    <select id="DisAllShop" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop limit #{start},#{pageCount};
+    </select>
+    <select id="DisAllShopU" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop where shop_state=1 limit #{start},#{pageCount};
+    </select>
+    <select id="DisShopByIncome" resultType="com.ordering.po.Shop">
+        select * from shop ORDER BY shop_income desc limit 0,3;
+    </select>
+    <select id="DisShopByType" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop where shop_type = #{shop_type} and shop_state=1 limit #{start},#{pageCount};
+    </select>
+    <select id="DisShopByPrice" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop where shop_price = #{shop_price} and shop_state=1 limit #{start},#{pageCount};
+    </select>
+    <select id="DisShopByTypePrice" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop where shop_type = #{shop_type} and shop_price = #{shop_price} and shop_state=1 limit #{start},#{pageCount};
+    </select>
+    <select id="DisShopByShopName" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop where shop_name like concat('%',#{shop_name},'%') and shop_state=1 limit #{start},#{pageCount};
+    </select>
+    <select id="SearchShopByShopName" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Shop">
+        select * from shop where shop_name like concat('%',#{shop_name},'%') limit #{start},#{pageCount};
+    </select>
+    <update id="UpdateShopById" parameterType="com.ordering.po.Shop">
+        update `shop` set shop_address = #{shop_address},shop_phone = #{shop_phone},shop_type = #{shop_type},shop_special = #{shop_special},shop_price = #{shop_price},opentime = #{opentime},shop_discount = #{shop_discount} where id = #{id};
+    </update>
+    <update id="UpdateShopIncome" parameterType="com.ordering.po.Shop">
+        update `shop` set shop_income = #{shop_income} where id = #{id};
+    </update>
+    <update id="UpdateShopStateById" parameterType="com.ordering.po.Shop">
+        update `shop` set shop_state = #{shop_state} where id = #{id};
+    </update>
+    <update id="UpdateShopImgById" parameterType="com.ordering.po.Shop">
+        update `shop` set shop_img = #{shop_img} where id = #{id};
+    </update>
+    <select id="DisMenuByMenuName" parameterType="com.ordering.po.Pageresult" resultMap="MenuShop">
+        select * from menu m left join shop s on m.shop_id = s.id where m.menu_name like concat('%',#{menu_name},'%') and s.shop_state=1 limit #{start},#{pageCount};
+    </select>
+    <select id="DisMenuBySell" resultMap="MenuShop">
+        select * from menu m left join shop s on m.shop_id = s.id ORDER BY m.menu_sell desc limit 0,3;
+    </select>
+    <select id="CountMenuByMenuName" parameterType="String" resultType="int">
+        select count(*) from menu m left join shop s on m.shop_id = s.id where m.menu_name like concat('%',#{menu_name},'%') and s.shop_state=1;
+    </select>
+    <select id="CountShopByShopName" parameterType="String" resultType="int">
+        select count(*) from shop where shop_name like concat('%',#{shop_name},'%');
+    </select>
+    <select id="DisShopById" parameterType="int" resultType="com.ordering.po.Shop">
+        select * from shop where id = #{id} and shop_state = 1;
+    </select>
+    <select id="CountAllShop" resultType="int">
+        select count(*) from shop;
+    </select>
+    <select id="CountShopByType" parameterType="com.ordering.po.Shop" resultType="int">
+        select count(*) from shop where shop_type = #{shop_type};
+    </select>
+    <select id="CountShopByPrice" parameterType="com.ordering.po.Shop" resultType="int">
+        select count(*) from shop where shop_price = #{shop_price};
+    </select>
+    <select id="CountShopByTypePrice" parameterType="com.ordering.po.Shop" resultType="int">
+        select count(*) from shop where shop_type = #{shop_type} and shop_price = #{shop_price};
+    </select>
+    <select id="DisMenuByShopId" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Menu">
+      select * from menu where shop_id = #{shop_id} limit #{start},#{pageCount};
+    </select>
+    <select id="CountMenuByShopId" parameterType="int" resultType="int">
+      select count(*) from menu where shop_id = #{shop_id};
+    </select>
+    <select id="DisMenuById" parameterType="int" resultMap="MenuShop">
+      select * from menu m left join shop s on m.shop_id = s.id where menu_id = #{menu_id};
+    </select>
+    <update id="UpdateMenuById" parameterType="com.ordering.po.Menu">
+        update `menu` set menu_count = #{menu_count} where menu_id = #{menu_id};
+    </update>
+    <update id="UpdateMenuImgById" parameterType="com.ordering.po.Menu">
+        update `menu` set menu_img = #{menu_img} where menu_id = #{menu_id};
+    </update>
+    <update id="UpdateMenuMCById" parameterType="com.ordering.po.Menu">
+        update `menu` set menu_count = #{menu_count},menu_price = #{menu_price} where menu_id = #{menu_id};
+    </update>
+    <update id="UpdateMenuSellById" parameterType="com.ordering.po.Menu">
+        update `menu` set menu_sell = #{menu_sell} where menu_id = #{menu_id};
+    </update>
+    <delete id="DeleteMenuById" parameterType="int">
+        delete from menu where menu_id = #{menu_id};
+    </delete>
+    <insert id="AddMenu" parameterType="com.ordering.po.Menu">
+        <selectKey keyColumn="menu_id" keyProperty="menu_id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert INTO `menu`
+        (shop_id,menu_name,menu_img,menu_price,menu_count,menu_sell) values (#{shop_id},#{menu_name},#{menu_img},#{menu_price},#{menu_count},#{menu_sell});
+    </insert>
+    <insert id="AddCart" parameterType="com.ordering.po.Cart">
+        <selectKey keyColumn="cart_id" keyProperty="cart_id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert INTO `cart`
+        (user_id,menu_id,menu_num) values (#{user_id},#{menu_id},#{menu_num});
+    </insert>
+    <select id="DisCartByUserId" parameterType="int" resultMap="CartMenuShop">
+        select * from cart c join menu m on c.menu_id = m.menu_id
+         left join shop s on m.shop_id = s.id where c.user_id = #{user_id};
+    </select>
+    <update id="UpdateCartById" parameterType="com.ordering.po.Cart">
+        update `cart` set menu_num = #{menu_num} where user_id = #{user_id} and menu_id = #{menu_id};
+    </update>
+    <select id="CountCartByMenuId" parameterType="com.ordering.po.Cart" resultType="int">
+        select count(*) from `cart` where user_id = #{user_id} and menu_id = #{menu_id};
+    </select>
+    <select id="DisCartByMenuId" parameterType="com.ordering.po.Cart" resultMap="CartMenuShop">
+        select * from cart c join menu m on c.menu_id = m.menu_id
+         left join shop s on m.shop_id = s.id where c.user_id = #{user_id} and c.menu_id = #{menu_id};
+    </select>
+    <delete id="DeleteCartById" parameterType="com.ordering.po.Cart">
+        delete from cart where user_id = #{user_id} and menu_id = #{menu_id};
+    </delete>
+    <insert id="AddAddress" parameterType="com.ordering.po.Address">
+        <selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert INTO `address`
+        (user_id,receiver_name,receiver_phone,receiver_address) values (#{user_id},#{receiver_name},#{receiver_phone},#{receiver_address});
+    </insert>
+    <select id="DisAddressById" parameterType="int" resultType="com.ordering.po.Address">
+        select * from address where user_id = #{user_id};
+    </select>
+    <update id="UpdateAddressById" parameterType="com.ordering.po.Address">
+        update address set receiver_name = #{receiver_name},receiver_phone = #{receiver_phone},receiver_address = #{receiver_address} where user_id = #{user_id} and id = #{id};
+    </update>
+    <insert id="AddComment" parameterType="com.ordering.po.Comment">
+        <selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert INTO `comment`
+        (user_id,shop_id,menu_id,content,createtime) values (#{user_id},#{shop_id},#{menu_id},#{content},NOW());
+    </insert>
+    <select id="DisCommentByUserId" parameterType="com.ordering.po.Pageresult" resultMap="CommentMenuShop">
+        select * from comment c join menu m on c.menu_id = m.menu_id
+         left join shop s on m.shop_id = s.id where c.user_id = #{user_id} limit #{start},#{pageCount};
+    </select>
+    <select id="DisCommentByUserMenuId" parameterType="com.ordering.po.Pageresult" resultMap="CommentMenuShop">
+        select * from comment c join menu m on c.menu_id = m.menu_id
+         left join shop s on m.shop_id = s.id where c.user_id = #{user_id} and c.menu_id = #{menu_id} limit #{start},#{pageCount};
+    </select>
+    <delete id="DeleteCommentById" parameterType="int">
+        delete from comment where id = #{id};
+    </delete>
+    <select id="DisCommentByShopId" parameterType="com.ordering.po.Pageresult" resultMap="CommentMenuShop">
+        select * from comment c join menu m on c.menu_id = m.menu_id
+         left join shop s on m.shop_id = s.id where c.shop_id = #{shop_id} limit #{start},#{pageCount};
+    </select>
+    <select id="CountCommentByUserId" parameterType="com.ordering.po.Comment" resultType="int">
+        select count(*) from comment where user_id = #{user_id};
+    </select>
+    <select id="CountCommentByShopId" parameterType="int" resultType="int">
+        select count(*) from comment where shop_id = #{shop_id};
+    </select>
+    <select id="CountCommentByUserMenuId" parameterType="com.ordering.po.Comment" resultType="int">
+        select count(*) from comment where user_id = #{user_id} and menu_id = #{menu_id};
+    </select>
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--注意：在mapper代理时，它具有特殊及重要的作用-->
+<!-- namespace：命名空间，用于隔离sql -->
+<!-- 还有一个很重要的作用，使用动态代理开发DAO，1. namespace必须和Mapper接口类路径一致 -->
+<mapper namespace="com.ordering.dao.OrderMapper">
+    <resultMap id="OrderA" type="com.ordering.po.Order">
+        <id property="id" column="id" />
+        <result property="order_id" column="order_id" />
+        <result property="user_id" column="user_id" />
+        <result property="address_id" column="address_id" />
+        <result property="paystate" column="paystate" />
+        <result property="price" column="price" />
+        <result property="deliverstate" column="deliverstate" />
+        <result property="arrivestate" column="arrivestate" />
+        <result property="createtime" column="createtime" />
+        <association property="address" javaType="com.ordering.po.Address">
+            <id property="id" column="id" />
+            <result property="user_id" column="user_id" />
+            <result property="receiver_name" column="receiver_name" />
+        </association>
+    </resultMap>
+
+    <resultMap id="OrderItemM" type="com.ordering.po.Order_item">
+        <id property="orderitem_id" column="orderitem_id" />
+        <result property="order_id" column="order_id" />
+        <result property="menu_id" column="menu_id" />
+        <result property="buynum" column="buynum" />
+        <result property="totalprice" column="totalprice" />
+        <result property="commentstate" column="commentstate" />
+        <association property="menu" javaType="com.ordering.po.Menu">
+            <id property="id" column="id" />
+            <result property="menu_id" column="menu_id" />
+            <result property="shop_id" column="shop_id"/>
+            <result property="menu_name" column="menu_name" />
+            <result property="menu_price" column="menu_price" />
+        </association>
+    </resultMap>
+    <insert id="AddOrder" parameterType="com.ordering.po.Order">
+        <selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert `order`
+        (order_id,user_id,address_id,price,paystate,deliverstate,arrivestate,createtime) values (#{order_id},#{user_id},#{address_id},#{price},#{paystate},#{deliverstate},#{arrivestate},NOW())
+    </insert>
+    <insert id="AddOrderItem" parameterType="com.ordering.po.Order_item">
+        <selectKey keyColumn="orderitem_id" keyProperty="orderitem_id" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert `order_item`
+        (order_id,menu_id,buynum,totalprice,commentstate) values (#{order_id},#{menu_id},#{buynum},#{totalprice},#{commentstate})
+    </insert>
+    <update id="UpdatePayState" parameterType="com.ordering.po.Order">
+        update `order` set paystate = #{paystate} where order_id = #{order_id};
+    </update>
+    <update id="UpdateCommentState" parameterType="com.ordering.po.Order_item">
+        update `order_item` set commentstate = #{commentstate} where orderitem_id = #{orderitem_id};
+    </update>
+    <update id="UpdateDeliverState" parameterType="com.ordering.po.Order">
+        UPDATE `order` set deliverstate = #{deliverstate} where order_id = #{order_id}
+    </update>
+    <update id="UpdateArriveState" parameterType="com.ordering.po.Order">
+        UPDATE `order` set arrivestate = #{arrivestate} where order_id = #{order_id}
+    </update>
+    <delete id="DeleteOrder" parameterType="String">
+        Delete from `order` where order_id = #{order_id}
+    </delete>
+    <delete id="DeleteOrderItem" parameterType="String">
+        Delete from order_item where order_id = #{order_id}
+    </delete>
+    <select id="DisOrderById" parameterType="com.ordering.po.Pageresult" resultMap="OrderA">
+        select * from `order` o left join `address` a on o.address_id = a.id where o.user_id = #{user_id} limit #{start},#{pageCount};
+    </select>
+    <select id="DisAllOrder" parameterType="com.ordering.po.Pageresult" resultMap="OrderA">
+        select * from `order` o left join `address` a on o.address_id = a.id limit #{start},#{pageCount};
+    </select>
+    <select id="DisSearchOrder" parameterType="com.ordering.po.Pageresult" resultMap="OrderA">
+        select * from `order` o left join `address` a on o.address_id = a.id where order_id like concat('%',#{order_id},'%') limit #{start},#{pageCount};
+    </select>
+    <select id="CountSearchOrder" parameterType="String" resultType="int">
+        select count(*) from `order` o left join `address` a on o.address_id = a.id where order_id like concat('%',#{order_id},'%');
+    </select>
+    <select id="CountOrderById" parameterType="int" resultType="int">
+        select count(*) from `order` where user_id = #{user_id};
+    </select>
+    <select id="CountAllOrder" resultType="int">
+        select count(*) from `order`;
+    </select>
+    <select id="DisAddressById" parameterType="int" resultType="com.ordering.po.Address">
+        select * from address where id = #{id};
+    </select>
+    <select id="DisOrderItemById" parameterType="String" resultMap="OrderItemM">
+        select * from order_item oi left join `menu` m on oi.menu_id = m.menu_id where oi.order_id = #{order_id};
+    </select>
+    <select id="DisAddressByUserId" parameterType="com.ordering.po.Pageresult" resultType="com.ordering.po.Address">
+        select * from address where user_id = #{user_id} limit #{start},#{pageCount};
+    </select>
+    <select id="CountAddressByUserId" parameterType="int" resultType="int">
+        select count(*) from address where user_id = #{user_id};
+    </select>
+</mapper>
